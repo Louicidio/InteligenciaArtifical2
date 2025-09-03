@@ -1,0 +1,164 @@
+=== MLP PARA CLASSIFICACAO DE COMBUSTIVEL DE CARROS ===
+============================================================
+
+Carregando dataset...
+Dataset carregado com encoding latin1
+Dataset original: 1218 carros
+Combustiveis encontrados: Fuel Types
+Petrol                     871
+Diesel                     106
+Electric                    97
+Hybrid                      79
+Petrol/Diesel               16
+Petrol/Hybrid               16
+Plug-in Hybrid               5
+Hybrid (Petrol)              4
+Diesel/Petrol                4
+Petrol, Diesel               3
+Hydrogen                     3
+Petrol, Hybrid               2
+Petrol/AWD                   2
+plug in hyrbrid              1
+Hybrid/Electric              1
+Petrol/EV                    1
+CNG/Petrol                   1
+Hybrid/Petrol                1
+Diesel Hybrid                1
+Petrol (Hybrid)              1
+Hybrid (Gas + Electric)      1
+Gas / Hybrid                 1
+Hybrid / Plug-in             1
+Name: count, dtype: int64
+Dataset processado: 806 carros
+Combustiveis finais: fuel_mapped
+Petrol    673
+Diesel     91
+Hybrid     42
+Name: count, dtype: int64
+
+Primeiras linhas:
+   engine_capacity  horsepower  max_speed  ...  torque  seats  fuel_mapped
+0           3990.0       963.0      340.0  ...   800.0    2.0       Hybrid
+1           6749.0       563.0      250.0  ...   900.0    5.0       Petrol
+2           1200.0        77.5      165.0  ...   120.0    5.0       Petrol
+3           3982.0       630.0      250.0  ...   900.0    4.0       Petrol
+4           5204.0       602.0      320.0  ...   560.0    2.0       Petrol
+
+[5 rows x 8 columns]
+
+Preparando dados...
+Treino: 644, Teste: 162
+Features: 7
+Classes: ['Diesel', 'Hybrid', 'Petrol']
+
+=== EXPERIMENTOS MLP ===
+
+Experimento 1: MLP 1 camada (10)
+----------------------------------------
+Arquitetura: [10]
+Learning rate: 0.01
+  Epoca 25: Loss=1.0012, Acc=0.8276
+  Epoca 50: Loss=0.9186, Acc=0.8354
+  Epoca 75: Loss=0.8515, Acc=0.8354
+  Epoca 100: Loss=0.7970, Acc=0.8354
+Resultado: Train=0.8354, Test=0.8333
+
+Experimento 2: MLP 2 camadas (16-8)
+----------------------------------------
+Arquitetura: [16, 8]
+Learning rate: 0.01
+  Epoca 25: Loss=1.0199, Acc=0.8339
+  Epoca 50: Loss=0.9437, Acc=0.8339
+  Epoca 75: Loss=0.8808, Acc=0.8354
+  Epoca 100: Loss=0.8287, Acc=0.8354
+Resultado: Train=0.8354, Test=0.8333
+
+Experimento 3: MLP 1 camada (20)
+----------------------------------------
+Arquitetura: [20]
+Learning rate: 0.005
+  Epoca 25: Loss=1.0368, Acc=0.8059
+  Epoca 50: Loss=0.9872, Acc=0.8323
+  Epoca 75: Loss=0.9426, Acc=0.8354
+  Epoca 100: Loss=0.9027, Acc=0.8354
+Resultado: Train=0.8354, Test=0.8333
+
+Experimento 4: MLP 2 camadas (32-16)
+----------------------------------------
+Arquitetura: [32, 16]
+Learning rate: 0.001
+  Epoca 25: Loss=1.0828, Acc=0.7764
+  Epoca 50: Loss=1.0732, Acc=0.8245
+  Epoca 75: Loss=1.0638, Acc=0.8354
+  Epoca 100: Loss=1.0545, Acc=0.8354
+Resultado: Train=0.8354, Test=0.8333
+
+Experimento 5: MLP 3 camadas (24-12-6)
+----------------------------------------
+Arquitetura: [24, 12, 6]
+Learning rate: 0.001
+  Epoca 25: Loss=1.0889, Acc=0.8323
+  Epoca 50: Loss=1.0795, Acc=0.8354
+  Epoca 75: Loss=1.0703, Acc=0.8354
+  Epoca 100: Loss=1.0612, Acc=0.8354
+Resultado: Train=0.8354, Test=0.8333
+
+=== RESUMO DOS RESULTADOS ===
+Configuracao                   | Treino   | Teste   
+--------------------------------------------------
+MLP 1 camada (10)              | 0.8354 | 0.8333
+MLP 2 camadas (16-8)           | 0.8354 | 0.8333
+MLP 1 camada (20)              | 0.8354 | 0.8333
+MLP 2 camadas (32-16)          | 0.8354 | 0.8333
+MLP 3 camadas (24-12-6)        | 0.8354 | 0.8333
+
+MELHOR MODELO: MLP 1 camada (10)
+Acuracia de teste: 0.8333
+
+RELATORIO DE CLASSIFICACAO:
+              precision    recall  f1-score   support
+
+      Diesel       0.00      0.00      0.00        18
+      Hybrid       0.00      0.00      0.00         9
+      Petrol       0.83      1.00      0.91       135
+
+    accuracy                           0.83       162
+   macro avg       0.28      0.33      0.30       162
+weighted avg       0.69      0.83      0.76       162
+
+
+EXEMPLOS DE PREDICAO:
+Carro 1:
+  Motor: 1591cc, 139HP
+  Velocidade: 180km/h, 0-100: 10.5s
+  Preco: $34,500
+  Real: Hybrid | Predito: Petrol (53.1%)
+
+Carro 2:
+  Motor: 2494cc, 236HP
+  Velocidade: 200km/h, 0-100: 7.6s
+  Preco: $38,400
+  Real: Hybrid | Predito: Petrol (50.1%)
+
+Carro 3:
+  Motor: 3996cc, 518HP
+  Velocidade: 296km/h, 0-100: 3.2s
+  Preco: $241,300
+  Real: Petrol | Predito: Petrol (47.7%)
+
+Carro 4:
+  Motor: 3200cc, 189HP
+  Velocidade: 180km/h, 0-100: 10.5s
+  Preco: $47,500
+  Real: Diesel | Predito: Petrol (52.4%)
+
+Carro 5:
+  Motor: 1199cc, 86HP
+  Velocidade: 170km/h, 0-100: 13.0s
+  Preco: $9,400
+  Real: Petrol | Predito: Petrol (55.2%)
+
+=== ANALISE CONCLUIDA ===
+Melhor acuracia: 83.33%
+Dataset: 806 carros
+Algoritmo: MLP com Backpropagation
