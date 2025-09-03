@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -213,7 +213,7 @@ class SimpleMLP:
             if (epoch + 1) % 25 == 0:
                 loss = -np.mean(np.sum(y * np.log(y_pred + 1e-15), axis=1))
                 acc = accuracy_score(np.argmax(y, axis=1), np.argmax(y_pred, axis=1))
-                print(f"  Epoca {epoch+1}: Loss={loss:.4f}, Acc={acc:.4f}")
+                print(f"Epoca {epoch+1}: Loss={loss:.4f}, Acc={acc:.4f}")
     
     def predict(self, X):
         return self.forward(X)
@@ -230,30 +230,23 @@ def one_hot_encode(y, num_classes):
 
 # === EXECUCAO PRINCIPAL ===
 try:
-    # 1. Carregar dados
-    print("\nCarregando dataset...")
+    
     df, feature_cols = load_car_dataset()
+
     
-    print(f"\nPrimeiras linhas:")
-    print(df[feature_cols + ['fuel_mapped']].head())
-    
-    # 2. Preparar dados
-    print(f"\nPreparando dados...")
     X = df[feature_cols].values
     y = df['fuel_mapped'].values
     
-    # Encode labels
     le = LabelEncoder()
     y_encoded = le.fit_transform(y)
     num_classes = len(le.classes_)
     y_onehot = one_hot_encode(y_encoded, num_classes)
     
-    # Normalizar
+    # normaliza
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
-    # Split
-    X_train, X_test, y_train, y_test = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split( #alteração para testes e treino
         X_scaled, y_onehot, test_size=0.2, random_state=42, stratify=y_onehot
     )
     
@@ -261,7 +254,7 @@ try:
     print(f"Features: {len(feature_cols)}")
     print(f"Classes: {list(le.classes_)}")
     
-    # 3. Experimentos
+    # configuraçãodo mlp
     print(f"\n=== EXPERIMENTOS MLP ===")
     
     configs = [
@@ -278,7 +271,6 @@ try:
         print(f"\nExperimento {i+1}: {config['name']}")
         print("-" * 40)
         
-        # Criar modelo
         model = SimpleMLP(
             input_size=X_train.shape[1],
             hidden_sizes=config['hidden'],
@@ -289,10 +281,8 @@ try:
         print(f"Arquitetura: {config['hidden']}")
         print(f"Learning rate: {config['lr']}")
         
-        # Treinar
         model.fit(X_train, y_train, epochs=100)
         
-        # Avaliar
         train_pred = model.predict_classes(X_train)
         test_pred = model.predict_classes(X_test)
         
@@ -308,7 +298,7 @@ try:
             'model': model
         })
     
-    # 4. Resultados
+    # resultados do mlp
     print(f"\n=== RESUMO DOS RESULTADOS ===")
     results_df = pd.DataFrame(results).sort_values('test_acc', ascending=False)
     
@@ -317,12 +307,12 @@ try:
     for _, row in results_df.iterrows():
         print(f"{row['name']:30} | {row['train_acc']:6.4f} | {row['test_acc']:6.4f}")
     
-    # 5. Melhor modelo
+    # acha o melhor modelo
     best = results_df.iloc[0]
     print(f"\nMELHOR MODELO: {best['name']}")
     print(f"Acuracia de teste: {best['test_acc']:.4f}")
     
-    # 6. Classificacao detalhada
+
     best_model = best['model']
     test_pred = best_model.predict_classes(X_test)
     test_true = np.argmax(y_test, axis=1)
@@ -330,28 +320,49 @@ try:
     print(f"\nRELATORIO DE CLASSIFICACAO:")
     print(classification_report(test_true, test_pred, target_names=le.classes_, zero_division=0))
     
-    # 7. Exemplos
-    print(f"\nEXEMPLOS DE PREDICAO:")
-    test_probs = best_model.predict(X_test)
-    
-    for i in range(min(5, len(X_test))):
-        true_label = le.classes_[test_true[i]]
-        pred_label = le.classes_[test_pred[i]]
-        confidence = test_probs[i][test_pred[i]] * 100
-        
-        orig_data = scaler.inverse_transform(X_test[i:i+1])[0]
-        
-        print(f"Carro {i+1}:")
-        print(f"  Motor: {orig_data[0]:.0f}cc, {orig_data[1]:.0f}HP")
-        print(f"  Velocidade: {orig_data[2]:.0f}km/h, 0-100: {orig_data[3]:.1f}s")
-        print(f"  Preco: ${orig_data[4]:,.0f}")
-        print(f"  Real: {true_label} | Predito: {pred_label} ({confidence:.1f}%)")
-        print()
     
     print(f"=== ANALISE CONCLUIDA ===")
-    print(f"Melhor acuracia: {best['test_acc']*100:.2f}%")
-    print(f"Dataset: {len(df)} carros")
-    print(f"Algoritmo: MLP com Backpropagation")
+    print(f"Melhor accuracy: {best['test_acc']*100:.2f}%")
+    
+    print(f"\n=== TESTE COM CARRO PERSONALIZADO ===")
+    
+    carro_personalizado = {
+        'engine_capacity': 2000,   
+        'horsepower': 180,          
+        'max_speed': 210,          
+        'acceleration': 7.5,        
+        'price': 45000,             
+        'torque': 320,              
+        'seats': 5                  
+    }
+    
+    carro_features = np.array([[
+        carro_personalizado['engine_capacity'],
+        carro_personalizado['horsepower'],
+        carro_personalizado['max_speed'],
+        carro_personalizado['acceleration'],
+        carro_personalizado['price'],
+        carro_personalizado['torque'],
+        carro_personalizado['seats']
+    ]])
+    
+    carro_normalizado = scaler.transform(carro_features)
+    
+    pred_probs = best_model.predict(carro_normalizado)
+    pred_class = best_model.predict_classes(carro_normalizado)[0]
+    pred_label = le.classes_[pred_class]
+    confidence = pred_probs[0][pred_class] * 100
+    
+    print(f"ESPECIFICAÇÕES DO CARRO:")
+    print(f"  Motor: {carro_personalizado['engine_capacity']}cc")
+    print(f"  Potência: {carro_personalizado['horsepower']}HP")
+    print(f"  Velocidade máxima: {carro_personalizado['max_speed']}km/h")
+    print(f"  Aceleração 0-100: {carro_personalizado['acceleration']}s")
+    print(f"  Preço: ${carro_personalizado['price']:,}")
+    print(f"  Torque: {carro_personalizado['torque']}Nm")
+    print(f"  Assentos: {carro_personalizado['seats']}")
+    print(f"\nPREDIÇÃO: {pred_label} ({confidence:.1f}% de confiança)")
+    
 
 except Exception as e:
     print(f"Erro: {e}")
